@@ -6,7 +6,8 @@ declare variebles
 */
 extern char keybook[ROWS][COLS];
 extern char input[SENT];
-extern int count;
+extern int input_count;
+static int count;
 static int subcode[2][SENT];
 static int cat[2][SENT / 8];
 
@@ -14,7 +15,7 @@ static int cat[2][SENT / 8];
 declare functions
 */
 int remain(int);
-int codcmp(char *);
+void codcmp(char *, int *, int *);
 void pcode(int, int, int);
 int EVEN(int);
 int codecat(int);
@@ -25,26 +26,23 @@ void code(char cmd)
 	int i;
 	int e_o;
 	int row, col;
-	int wcount;							//count how many letters are actually in the argument
 	int ccount;							//count sections cut by the codecat() function
 	int cut;							//number of sections cut by the codecat() function
+	extern char input[SENT];
 
 	printf("Code called.\n");
 
-	for (i = 0; i < SENT; i++)
+	for (i = 0; i < input_count; i++)
 	{
-		row, col = codcmp(input[i]);	//get the value of the letter
-		wcount++;
+		printf("Code loop %d.\n", i + 1);
+
+		codcmp(input[i], &row, &col);	//get the value of the letter
 
 		/*process*/
-		{
-			//row
-			if (row = NULL)
-				row = 3;
-			//column
-			if (col = NULL)
-				col = remain(i + 1);
-		}
+		if (row = 0)
+			row = 3;
+		if (col = 0)
+			col = remain(i + 1);
 
 		subcode[0][i] = row;			//store the rows in the first line
 		subcode[1][i] = col;			//store the columns in the second line
@@ -55,7 +53,8 @@ void code(char cmd)
 	{
 		subcode[0][i] = NULL;
 		subcode[1][i] = NULL;
-		cut = codecat(i - 1);
+		input_count -= 1;
+		cut = codecat(input_count);
 
 		for (ccount = 1; ccount < cut; ccount++)
 			pcode(cat[0][ccount - 1], cat[0][ccount], cat[1][ccount]);
@@ -106,23 +105,21 @@ int remain(int i)
 	}
 }
 
-int codcmp(char *input)
+void codcmp(char *input, int * row, int * col)
 {
-	int row;							//count row
-	int col;							//count column
+	int status = 0;
+	extern char keybook[ROWS][COLS];
 
-	printf("Start compare.\n");
+	printf("Start compare the letter %c.\n", *input);
 
-	for (row = 0; row < ROWS; row++)
+	for (*row = 0; *row < ROWS; *row++)
 	{
-		for (col = 0; col < COLS; col++)
+		for (*col = 0; *col < COLS; *col++)
 		{
-			if (*input == keybook[row][col])
+			if (*input == keybook[*row][*col])
 			{
-				printf("Found the letter at %d, %d.\n", row, col);
-
-				return row;
-				return col;
+				printf("Found the letter at %d, %d.\n", *(row + 1), *(col + 1));
+				return;
 			}
 		}
 	}
@@ -234,8 +231,8 @@ void construct(int string)
 
 	for (count = 0; count < string; count++)
 	{
-		row = subcode[0][count];
-		col = subcode[1][count];
+		row = subcode[0][count] - 1;
+		col = subcode[1][count] - 1;
 		input[count] = keybook[row][col];
 	}
 
